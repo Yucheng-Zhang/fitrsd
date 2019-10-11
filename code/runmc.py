@@ -3,7 +3,7 @@ from . import prob
 from . import utils
 
 
-def run_mcmc(pm, nwalkers, burnin, nsteps, chainroot, progress=False):
+def run_mcmc(pm, nwalkers, burnin, nsteps, froot, progress=False):
     '''main function for runnning MCMC'''
     ndim = pm.npars
     # starting point for each walker
@@ -11,7 +11,7 @@ def run_mcmc(pm, nwalkers, burnin, nsteps, chainroot, progress=False):
     p0 = pm.ini_pars(nwalkers)
 
     # set up the backend for hdf5 chain file
-    fn_h5 = chainroot + '.h5'
+    fn_h5 = froot + '.h5'
     backend = emcee.backends.HDFBackend(fn_h5)
     backend.reset(nwalkers, ndim)
 
@@ -25,5 +25,9 @@ def run_mcmc(pm, nwalkers, burnin, nsteps, chainroot, progress=False):
                               store=True, progress=progress)
 
     # write chain to txt data file
-    fo = chainroot + '.dat'
-    utils.hdf5_to_txt(fn_h5, fo, burnin=burnin)
+    fo_chain = froot + '_chain.dat'
+    utils.hdf5_to_txt(fn_h5, fo_chain, burnin=burnin)
+
+    # get statistics
+    fo_stat = froot + '_stat.dat'
+    utils.get_stat(fo_chain, fo_stat, pars=pm.pars['keys'], dof=pm.dof)

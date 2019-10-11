@@ -24,6 +24,8 @@ class prob:
         for line in lines:
             if len(line) == 0:  # empty line
                 continue
+            if line[0] == '#':  # comment
+                continue
             ls = line.split()
             if ls[0] in self.pars['keys']:
                 self.pars[ls[0]] = np.array(ls[1:]).astype(np.float)
@@ -58,6 +60,8 @@ class prob:
 
         self.npars = len(self.pars['keys'])  # number of parameters
         self.ndata = len(self.data)  # number of data points
+
+        self.dof = self.ndata - self.npars + 1  # degree of freedom
 
     def ini_pars(self, nwalkers):
         '''initialize the walkers'''
