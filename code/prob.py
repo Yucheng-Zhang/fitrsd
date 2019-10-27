@@ -12,7 +12,8 @@ class prob:
         '''parse the ini file'''
 
         self.pars = collections.OrderedDict()
-        self.pars['keys'] = ['nu', 'f', 'sFOG']
+        self.pars['keys'] = ['nu', 'f', 'sFOG']  # all the possible parameters
+        self.pars['pars'] = []  # fitting parameters
 
         self.inis = collections.OrderedDict()
         self.inis['keys'] = ['xi0file', 'xi2file', 'cov_file',
@@ -27,13 +28,27 @@ class prob:
             if line[0] == '#':  # comment
                 continue
             ls = line.split()
-            if ls[0] in self.pars['keys']:
+            if ls[0] in self.pars['keys']:  # paramters
                 self.pars[ls[0]] = np.array(ls[1:]).astype(np.float)
+                if self.pars[ls[0]][0] > self.pars[ls[0]][1] and \
+                        self.pars[ls[0]][0] < self.pars[ls[0]][2]:  # fitting parameter
+                    self.pars['pars'].append(ls[0])
+
             elif ls[0] in self.inis['keys']:
                 if ls[0] == 'slim':
                     self.inis[ls[0]] = np.array(ls[1:]).astype(np.float)
                 else:
                     self.inis[ls[0]] = ls[1]
+
+        # output pars
+        str_ = 'fitting parameters: '
+        for k_ in self.pars['pars']:
+            str_ += '  {0:s}'.format(k_)
+        str_ += '\n fixed parameters: '
+        for k_ in self.pars['keys']:
+            if k_ not in self.pars['pars']:
+                str_ += '  {0:s}'.format(k_)
+        print(str_)
 
         # make data vector & covariance matrix
         xi0 = np.loadtxt(self.inis['xi0file'])
@@ -58,7 +73,7 @@ class prob:
         self.gsrsd.set_s_mu_sample(self.ss)
         self.gsrsd.set_y_sample()
 
-        self.npars = len(self.pars['keys'])  # number of parameters
+        self.npars = len(self.pars['pars'])  # number of parameters
         self.ndata = len(self.data)  # number of data points
 
         self.dof = self.ndata - self.npars + 1  # degree of freedom
@@ -67,7 +82,7 @@ class prob:
         '''initialize the walkers'''
         # uniform distribution
         pos0 = np.random.random((nwalkers, self.npars))
-        for i, p in enumerate(self.pars['keys']):
+        for i, p in enumerate(self.pars['pars']):
             width = self.pars[p][2] - self.pars[p][1]
             pos0[:, i] = self.pars[p][1] + width * pos0[:, i]
 
@@ -75,15 +90,19 @@ class prob:
 
     def c_model(self, theta):
         '''compute the model vector'''
-        self.gsrsd.set_pars(nu=theta[0], f_v=theta[1], sFOG=theta[2])
+        for i, p in enumerate(self.pars['pars']):  # map theta to fitting pars
+            self.pars[p][0] = theta[i]
+
+        self.gsrsd.set_pars(nu=self.pars['nu'][0], f_v=self.pars['f'][0],
+                            sFOG=self.pars['sFOG'][0])
         xi0, xi2 = self.gsrsd.c_xi()
         return np.concatenate((xi0, xi2))
 
     def ln_prior(self, theta):
         '''ln prior'''
         # uniform in the limited range
-        for i, par in enumerate(self.pars['keys']):
-            if theta[i] < self.pars[par][1] or theta[i] > self.pars[par][2]:
+        for i, p in enumerate(self.pars['pars']):
+            if theta[i] < self.pars[p][1] or theta[i] > self.pars[p][2]:
                 return -np.inf
         return 0.
 

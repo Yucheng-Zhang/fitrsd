@@ -23,7 +23,7 @@ def jackknife_cov(data):
     return cov
 
 
-def hdf5_to_txt(fn, fo, pars=['nu', 'f', 'sFOG'], burnin=0):
+def hdf5_to_txt(fn, fo, pars, burnin=0):
     '''Convert HDF5 chain to txt data.'''
     reader = emcee.backends.HDFBackend(fn, read_only=True)
     samples = reader.get_chain(discard=burnin, flat=True)
@@ -40,7 +40,7 @@ def hdf5_to_txt(fn, fo, pars=['nu', 'f', 'sFOG'], burnin=0):
     np.savetxt(fo, data, header=header, fmt='%15.8e')
 
 
-def get_stat(fn, fo, pars=['nu', 'f', 'sFOG'], dof=None):
+def get_stat(fn, fo, pars, dof=None):
     '''Get statistics from MCMC chain file.'''
     chain = np.loadtxt(fn)
     ibf = np.argmax(chain[:, 0])  # best-fit (max-likelihood) index

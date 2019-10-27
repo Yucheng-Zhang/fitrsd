@@ -26,8 +26,8 @@ def run_mcmc(pm, nwalkers, burnin, nsteps, froot, progress=False):
 
     # write chain to txt data file
     fo_chain = froot + '_chain.dat'
-    utils.hdf5_to_txt(fn_h5, fo_chain, burnin=burnin)
+    utils.hdf5_to_txt(fn_h5, fo_chain, pm.pars['pars'], burnin=burnin)
 
     # get statistics
     fo_stat = froot + '_stat.dat'
-    utils.get_stat(fo_chain, fo_stat, pars=pm.pars['keys'], dof=pm.dof)
+    utils.get_stat(fo_chain, fo_stat, pm.pars['pars'], dof=pm.dof)
