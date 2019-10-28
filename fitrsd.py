@@ -2,7 +2,7 @@
 
 import argparse
 from code import prob
-from code import runmc
+from code import driver
 import sys
 
 if __name__ == "__main__":
@@ -16,7 +16,8 @@ if __name__ == "__main__":
                         help='burnin steps, which will not be saved to chain file')
     parser.add_argument('-nsteps', type=int, default=10,
                         help='number of steps for each walker')
-    parser.add_argument('-progress', type=bool, default=False)
+    parser.add_argument('-progress', type=int, default=0)
+    parser.add_argument('-run_mcmc', type=int, default=1)
     args = parser.parse_args()
 
 
@@ -29,5 +30,8 @@ if __name__ == "__main__":
 
     pm = prob.prob(args.ini_file)  # the probability model
 
-    runmc.run_mcmc(pm, args.nwalkers, args.burnin, args.nsteps,
-                   args.froot, progress=args.progress)
+    if args.run_mcmc:
+        driver.run_mcmc(pm, args.nwalkers, args.burnin, args.nsteps,
+                        args.froot, progress=bool(args.progress))
+    else:
+        driver.run_stat(pm, args.froot, args.burnin)

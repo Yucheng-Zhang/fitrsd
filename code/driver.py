@@ -5,6 +5,7 @@ from . import utils
 
 def run_mcmc(pm, nwalkers, burnin, nsteps, froot, progress=False):
     '''main function for runnning MCMC'''
+    pm.ini_dm()
     ndim = pm.npars
     # starting point for each walker
     print('>> Initializing walkers...')
@@ -23,6 +24,21 @@ def run_mcmc(pm, nwalkers, burnin, nsteps, froot, progress=False):
     print('>> Running MCMC, HDF5 chain file: {0:s}'.format(fn_h5))
     _state = sampler.run_mcmc(p0, burnin+nsteps,
                               store=True, progress=progress)
+
+    # write chain to txt data file
+    fo_chain = froot + '_chain.dat'
+    utils.hdf5_to_txt(fn_h5, fo_chain, pm.pars['pars'], burnin=burnin)
+
+    # get statistics
+    fo_stat = froot + '_stat.dat'
+    utils.get_stat(fo_chain, fo_stat, pm.pars['pars'], dof=pm.dof)
+
+
+def run_stat(pm, froot, burnin):
+    '''get chain and stat from hdf5'''
+    pm.ini_dm()
+
+    fn_h5 = froot + '.h5'
 
     # write chain to txt data file
     fo_chain = froot + '_chain.dat'

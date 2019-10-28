@@ -50,6 +50,10 @@ class prob:
                 str_ += '  {0:s}'.format(k_)
         print(str_)
 
+        self.npars = len(self.pars['pars'])  # number of parameters
+
+    def ini_dm(self):
+        '''prepare data and model'''
         # make data vector & covariance matrix
         xi0 = np.loadtxt(self.inis['xi0file'])
         xi2 = np.loadtxt(self.inis['xi2file'])
@@ -73,7 +77,6 @@ class prob:
         self.gsrsd.set_s_mu_sample(self.ss)
         self.gsrsd.set_y_sample()
 
-        self.npars = len(self.pars['pars'])  # number of parameters
         self.ndata = len(self.data)  # number of data points
 
         self.dof = self.ndata - self.npars + 1  # degree of freedom

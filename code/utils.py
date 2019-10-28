@@ -29,10 +29,16 @@ def hdf5_to_txt(fn, fo, pars, burnin=0):
     samples = reader.get_chain(discard=burnin, flat=True)
     ln_prob = reader.get_log_prob(discard=burnin, flat=True)
 
+    nwalkers, ndim = reader.shape[0], reader.shape[1]
+    burnin *= nwalkers
+    nsteps = ln_prob.shape[0] - burnin
+
     data = np.column_stack((ln_prob, samples))
 
     header = 'FitRSD MCMC chain\n'
     header += 'Raw HDF5 file: {0:s}\n'.format(fn)
+    header += 'burnin: {0:d}, nsteps: {1:d}\n'.format(burnin, nsteps)
+    header += 'number of fitting parameters: {0:d}\n'.format(ndim)
     header += 'ln_prob'
     for par in pars:
         header = header + ' '*5 + par
@@ -47,10 +53,12 @@ def get_stat(fn, fo, pars, dof=None):
 
     databf = chain[ibf]
     data_mean = np.mean(chain, axis=0)
-    data = np.array([databf, data_mean])
+    data_sigma = np.std(chain, axis=0, ddof=0)
+
+    data = np.array([databf, data_mean, data_sigma])
     data[:, 0] = -2. * data[:, 0]  # chi2
 
-    header = 'best-fit and mean parameters\n'
+    header = 'row: best-fit, mean, sigma\n'
     if dof != None:
         header += 'dof = {0:d}\n'.format(dof)
     header += 'chi2'
