@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     pm = prob.prob(args.ini_file)  # the probability model
 
-    if args.run_mcmc:
+    if bool(args.run_mcmc):
         driver.run_mcmc(pm, args.nwalkers, args.burnin, args.nsteps,
                         args.froot, progress=bool(args.progress))
     else:
