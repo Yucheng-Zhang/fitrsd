@@ -16,11 +16,16 @@ def get_cosmology(tag):
     return cosmo
 
 
-def jackknife_cov(data):
-    '''Make covariance matrix w/ jackknife.
+def jackknife_icov(data, correct=True):
+    '''Make inverse covariance matrix w/ jackknife.
     Each row are jks for one variable.'''
     cov = np.cov(data, ddof=0) * (data.shape[1] - 1)
-    return cov
+    icov = np.linalg.inv(cov)
+    if correct:
+        nd = data.shape[0]  # length of the data vector
+        ns = data.shape[1]  # number of jackknives
+        icov = (1 - (nd+1) / (ns-1)) * icov
+    return icov
 
 
 def hdf5_to_txt(fn, fo, pars, burnin=0):

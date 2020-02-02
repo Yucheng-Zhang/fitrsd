@@ -16,7 +16,7 @@ class prob:
         self.pars['pars'] = []  # fitting parameters
 
         self.inis = collections.OrderedDict()
-        self.inis['keys'] = ['xi0file', 'xi2file', 'cov_file',
+        self.inis['keys'] = ['xi0file', 'xi2file', 'icov_file',
                              'clpt_xi', 'clpt_v', 'clpt_s',
                              'slim']
 
@@ -54,7 +54,7 @@ class prob:
 
     def ini_dm(self):
         '''prepare data and model'''
-        # make data vector & covariance matrix
+        # make data vector & inverse covariance matrix
         xi0 = np.loadtxt(self.inis['xi0file'])
         xi2 = np.loadtxt(self.inis['xi2file'])
         idx = (xi0[:, 0] >= self.inis['slim'][0]) \
@@ -63,12 +63,10 @@ class prob:
         self.ss = xi0[:, 0][idx]  # s sample points
         self.data = xi02[:, 1]
 
-        if self.inis['cov_file'] == 'jackknife':
-            self.cov = utils.jackknife_cov(xi02[:, 4:])
+        if self.inis['icov_file'] == 'jackknife':
+            self.icov = utils.jackknife_icov(xi02[:, 4:])
         else:
-            self.cov = np.loadtxt(self.inis['cov_file'])
-
-        self.icov = np.linalg.inv(self.cov)
+            self.icov = np.loadtxt(self.inis['icov_file'])
 
         # model related
         self.gsrsd = gsm.gsm()
