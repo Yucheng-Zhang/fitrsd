@@ -12,7 +12,8 @@ class prob:
         '''parse the ini file'''
 
         self.pars = collections.OrderedDict()
-        self.pars['keys'] = ['nu', 'f', 'stot2']  # all the possible parameters
+        # all the possible parameters
+        self.pars['keys'] = ['nu', 'beta', 'stot2']
         self.pars['pars'] = []  # fitting parameters
 
         self.inis = collections.OrderedDict()
@@ -94,7 +95,7 @@ class prob:
         for i, p in enumerate(self.pars['pars']):  # map theta to fitting pars
             self.pars[p][0] = theta[i]
 
-        self.gsrsd.set_pars(nu=self.pars['nu'][0], f_v=self.pars['f'][0],
+        self.gsrsd.set_pars(nu=self.pars['nu'][0], beta=self.pars['beta'][0],
                             stot2=self.pars['stot2'][0])
         xi0, xi2 = self.gsrsd.c_xi()
         return np.concatenate((xi0, xi2))
