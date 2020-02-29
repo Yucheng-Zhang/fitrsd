@@ -13,7 +13,7 @@ class prob:
 
         self.pars = collections.OrderedDict()
         # all the possible parameters
-        self.pars['keys'] = ['nu', 'beta', 'stot2']
+        self.pars['keys'] = ['nu', 'beta', 'stot']
         self.pars['pars'] = []  # fitting parameters
 
         self.inis = collections.OrderedDict()
@@ -96,7 +96,7 @@ class prob:
             self.pars[p][0] = theta[i]
 
         self.gsrsd.set_pars(nu=self.pars['nu'][0], beta=self.pars['beta'][0],
-                            stot2=self.pars['stot2'][0])
+                            stot=self.pars['stot'][0])
         xi0, xi2 = self.gsrsd.c_xi()
         return np.concatenate((xi0, xi2))
 
