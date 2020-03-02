@@ -36,7 +36,7 @@ def hdf5_to_txt(fn, fo, pars, burnin=0):
 
     nwalkers, ndim = reader.shape[0], reader.shape[1]
     burnin *= nwalkers
-    nsteps = ln_prob.shape[0] - burnin
+    nsteps = ln_prob.shape[0]
 
     data = np.column_stack((ln_prob, samples))
 
