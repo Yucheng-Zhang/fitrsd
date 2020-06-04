@@ -13,13 +13,13 @@ class prob:
 
         self.pars = collections.OrderedDict()
         # all the possible parameters
-        self.pars['keys'] = ['nu', 'beta', 'stot']
+        self.pars['keys'] = ['nu', 'F1', 'F2', 'beta', 'stot']
         self.pars['pars'] = []  # fitting parameters
 
         self.inis = collections.OrderedDict()
         self.inis['keys'] = ['xi0file', 'xi2file', 'icov_file',
                              'clpt_xi', 'clpt_v', 'clpt_s',
-                             'slim']
+                             'slim', 'use_pbs']
 
         # load & parse the ini file
         lines = [line.strip() for line in open(fn).readlines()]
@@ -38,14 +38,25 @@ class prob:
             elif ls[0] in self.inis['keys']:
                 if ls[0] == 'slim':
                     self.inis[ls[0]] = np.array(ls[1:]).astype(np.float)
+                elif ls[0] == 'use_pbs':
+                    self.inis[ls[0]] = bool(int(ls[1]))
                 else:
                     self.inis[ls[0]] = ls[1]
+
+        # check parameters
+        if self.inis['use_pbs']:  # use peak background split
+            for k_ in ['F1', 'F2']:
+                if k_ in self.pars['pars']:
+                    self.pars['pars'].remove(k_)
+        else:
+            if 'nu' in self.pars['pars']:
+                self.pars['pars'].remove('nu')
 
         # output pars
         str_ = 'fitting parameters: '
         for k_ in self.pars['pars']:
-            str_ += '  {0:s}'.format(k_)
-        str_ += '\n fixed parameters: '
+            str_ += '  {:s}'.format(k_)
+        str_ += '\n fixed or not used parameters: '
         for k_ in self.pars['keys']:
             if k_ not in self.pars['pars']:
                 str_ += '  {0:s}'.format(k_)
@@ -95,8 +106,13 @@ class prob:
         for i, p in enumerate(self.pars['pars']):  # map theta to fitting pars
             self.pars[p][0] = theta[i]
 
-        self.gsrsd.set_pars(nu=self.pars['nu'][0], beta=self.pars['beta'][0],
-                            stot=self.pars['stot'][0])
+        if self.inis['use_pbs']:
+            self.gsrsd.set_pars(nu=self.pars['nu'][0],
+                                beta=self.pars['beta'][0], stot=self.pars['stot'][0])
+        else:
+            self.gsrsd.set_pars(use_pbs=False, F1=self.pars['F1'][0], F2=self.pars['F2'][0],
+                                beta=self.pars['beta'][0], stot=self.pars['stot'][0])
+
         xi0, xi2 = self.gsrsd.c_xi()
         return np.concatenate((xi0, xi2))
 

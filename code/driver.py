@@ -19,7 +19,7 @@ def run_mcmc(pm, nwalkers, nsteps, fn_h5, progress=False):
                                     backend=backend)
 
     # run MCMC
-    print('>> Running MCMC, HDF5 chain file: {0:s}'.format(fn_h5))
+    print('>> Running MCMC, HDF5 chain file: {:s}'.format(fn_h5))
     _state = sampler.run_mcmc(p0, nsteps, progress=progress)
 
 
